@@ -1,5 +1,5 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/models/todo_model.dart';
 import 'package:todo/utils/date_formatter.dart';
@@ -83,144 +83,161 @@ class TodoListView extends StatelessWidget {
         priorityText = '중간';
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Slidable(
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          children: [
-            SlidableAction(
-              onPressed: (_) {
-                viewModel.deleteTodo(todo.id);
-              },
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
-              label: '삭제',
-              borderRadius: BorderRadius.circular(12),
-            ),
-            SlidableAction(
-              onPressed: (_) {
-                _showPriorityDialog(context, todo, viewModel);
-              },
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              icon: Icons.flag,
-              label: '우선순위',
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ],
-        ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: todo.isCompleted
-                ? BorderSide.none
-                : BorderSide(color: priorityColor, width: 1),
-          ),
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TodoDetailView(todo: todo),
+    // iOS 스타일 스와이프 기능
+    return Dismissible(
+      key: Key(todo.id),
+      background: Container(
+        color: const Color(0xFF34C759), // iOS 녹색
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: const Icon(CupertinoIcons.checkmark_alt, color: Colors.white),
+      ),
+      secondaryBackground: Container(
+        color: const Color(0xFFFF3B30), // iOS 빨간색
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: const Icon(CupertinoIcons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // 왼쪽에서 오른쪽으로 스와이프: 완료/미완료 토글
+          viewModel.toggleTodoStatus(todo);
+          return false; // 스와이프 후 원래 위치로 돌아가도록
+        } else {
+          // 오른쪽에서 왼쪽으로 스와이프: 삭제
+          return await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('할 일 삭제'),
+              content: const Text('이 할 일을 삭제하시겠습니까?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('취소'),
                 ),
-              );
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // 체크박스
-                  Transform.scale(
-                    scale: 1.2,
-                    child: Checkbox(
-                      shape: const CircleBorder(),
-                      value: todo.isCompleted,
-                      activeColor: colorScheme.primary,
-                      onChanged: (value) {
-                        viewModel.toggleTodoStatus(todo);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // 할 일 내용
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                todo.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: todo.isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                  color: todo.isCompleted
-                                      ? colorScheme.onSurface.withOpacity(0.6)
-                                      : colorScheme.onSurface,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (!todo.isCompleted)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: priorityColor.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  priorityText,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: priorityColor,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        if (todo.description.isNotEmpty)
-                          Text(
-                            todo.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: colorScheme.onSurface.withOpacity(0.7),
-                              decoration: todo.isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        const SizedBox(height: 4),
-                        Text(
-                          todo.isCompleted
-                              ? '완료: ${DateFormatter.formatDate(todo.completedAt!)}'
-                              : '생성: ${DateFormatter.formatDate(todo.createdAt)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDarkMode
-                                ? colorScheme.onSurface.withOpacity(0.7)
-                                : colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('삭제', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      onDismissed: (direction) {
+        if (direction == DismissDirection.endToStart) {
+          viewModel.deleteTodo(todo.id);
+        }
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: todo.isCompleted
+              ? BorderSide.none
+              : BorderSide(color: priorityColor, width: 1),
+        ),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TodoDetailView(todo: todo),
               ),
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // 체크박스
+                Transform.scale(
+                  scale: 1.2,
+                  child: Checkbox(
+                    shape: const CircleBorder(),
+                    value: todo.isCompleted,
+                    activeColor: colorScheme.primary,
+                    onChanged: (value) {
+                      viewModel.toggleTodoStatus(todo);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 할 일 내용
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              todo.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                decoration: todo.isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: todo.isCompleted
+                                    ? colorScheme.onSurface.withOpacity(0.6)
+                                    : colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (!todo.isCompleted)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: priorityColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                priorityText,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: priorityColor,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      if (todo.description.isNotEmpty)
+                        Text(
+                          todo.description,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurface.withOpacity(0.7),
+                            decoration: todo.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        todo.isCompleted
+                            ? '완료: ${DateFormatter.formatDate(todo.completedAt!)}'
+                            : '생성: ${DateFormatter.formatDate(todo.createdAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode
+                              ? colorScheme.onSurface.withOpacity(0.7)
+                              : colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -54,103 +54,109 @@ class _TodoDetailViewState extends State<TodoDetailView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 제목 입력
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: '제목',
-                hintText: '할 일 제목을 입력하세요',
-              ),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            // 설명 입력
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: '설명',
-                hintText: '할 일에 대한 설명을 입력하세요 (선택사항)',
-                alignLabelWithHint: true,
-              ),
-              maxLines: 5,
-            ),
-            const SizedBox(height: 24),
-
-            // 우선순위 선택
-            Text('우선순위', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _buildPriorityButton(
-                  context,
-                  '낮음',
-                  1,
-                  isDarkMode ? Colors.green.shade300 : Colors.green,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 제목 입력
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: '제목',
+                  hintText: '할 일 제목을 입력하세요',
                 ),
-                const SizedBox(width: 8),
-                _buildPriorityButton(
-                  context,
-                  '중간',
-                  2,
-                  isDarkMode ? Colors.orange.shade300 : Colors.orange,
-                ),
-                const SizedBox(width: 8),
-                _buildPriorityButton(
-                  context,
-                  '높음',
-                  3,
-                  isDarkMode ? Colors.red.shade300 : Colors.red,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // 완료 여부
-            Row(
-              children: [
-                Checkbox(
-                  value: _isCompleted,
-                  onChanged: (value) {
-                    setState(() {
-                      _isCompleted = value ?? false;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                const Text('완료됨'),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 날짜 정보
-            if (widget.todo.createdAt != null)
-              Text(
-                '생성일: ${DateFormatter.formatDate(widget.todo.createdAt)}',
-                style: TextStyle(
-                  color: isDarkMode
-                      ? colorScheme.onSurface.withOpacity(0.8)
-                      : colorScheme.onSurface.withOpacity(0.6),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            if (widget.todo.completedAt != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  '완료일: ${DateFormatter.formatDate(widget.todo.completedAt!)}',
+              const SizedBox(height: 16),
+
+              // 설명 입력
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: '설명',
+                  hintText: '할 일에 대한 설명을 입력하세요 (선택사항)',
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 5,
+              ),
+              const SizedBox(height: 24),
+
+              // 우선순위 선택
+              Text('우선순위', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _buildPriorityButton(
+                    context,
+                    '낮음',
+                    1,
+                    isDarkMode ? Colors.green.shade300 : Colors.green,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildPriorityButton(
+                    context,
+                    '중간',
+                    2,
+                    isDarkMode ? Colors.orange.shade300 : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildPriorityButton(
+                    context,
+                    '높음',
+                    3,
+                    isDarkMode ? Colors.red.shade300 : Colors.red,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 완료 여부
+              Row(
+                children: [
+                  Checkbox(
+                    value: _isCompleted,
+                    onChanged: (value) {
+                      setState(() {
+                        _isCompleted = value ?? false;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('완료됨'),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 날짜 정보
+              if (widget.todo.createdAt != null)
+                Text(
+                  '생성일: ${DateFormatter.formatDate(widget.todo.createdAt)}',
                   style: TextStyle(
                     color: isDarkMode
                         ? colorScheme.onSurface.withOpacity(0.8)
                         : colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
-              ),
-          ],
+              if (widget.todo.completedAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '완료일: ${DateFormatter.formatDate(widget.todo.completedAt!)}',
+                    style: TextStyle(
+                      color: isDarkMode
+                          ? colorScheme.onSurface.withOpacity(0.8)
+                          : colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(
