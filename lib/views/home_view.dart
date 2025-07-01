@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo/viewmodels/theme_viewmodel.dart';
 import 'package:todo/viewmodels/todo_viewmodel.dart';
 import 'package:todo/views/todo_add_view.dart';
 import 'package:todo/views/todo_list_view.dart';
@@ -24,9 +25,24 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final viewModel = Provider.of<TodoViewModel>(context);
+    final themeViewModel = Provider.of<ThemeViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('할 일 목록'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('할 일 목록'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeViewModel.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () {
+              themeViewModel.toggleThemeMode();
+            },
+            tooltip: themeViewModel.isDarkMode ? '라이트 모드로 전환' : '다크 모드로 전환',
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // 검색 및 필터 영역

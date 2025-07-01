@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/utils/app_theme.dart';
+import 'package:todo/viewmodels/theme_viewmodel.dart';
 import 'package:todo/viewmodels/todo_viewmodel.dart';
 import 'package:todo/views/home_view.dart';
 
@@ -19,21 +20,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => TodoViewModel())],
-      child: MaterialApp(
-        title: '할 일 관리',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const HomeView(),
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
-        locale: const Locale('ko', 'KR'),
+      providers: [
+        ChangeNotifierProvider(create: (_) => TodoViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
+      ],
+      child: Consumer<ThemeViewModel>(
+        builder: (context, themeViewModel, _) {
+          return MaterialApp(
+            title: '할 일 관리',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeViewModel.themeMode,
+            home: const HomeView(),
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
+            locale: const Locale('ko', 'KR'),
+          );
+        },
       ),
     );
   }
