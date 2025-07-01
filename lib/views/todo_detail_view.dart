@@ -248,30 +248,191 @@ class _TodoDetailViewState extends State<TodoDetailView> {
   }
 
   void _deleteTodo() {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('할 일 삭제'),
-        content: const Text('이 할 일을 삭제하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+      barrierDismissible: true,
+      barrierLabel: '할 일 삭제 다이얼로그',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation1, animation2) => const SizedBox(),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.5, end: 1.0).animate(curvedAnimation),
+          child: FadeTransition(
+            opacity: animation,
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              elevation: 8,
+              icon: ShakeAnimatedIcon(
+                icon: Icons.delete_forever_rounded,
+                color: Colors.red,
+                size: 36,
+              ),
+              title: const Text(
+                '할 일 삭제',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '정말로 이 할 일을 삭제하시겠습니까?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '"${widget.todo.title}"',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              actions: [
+                _buildDialogButton(
+                  context: context,
+                  label: '취소',
+                  onPressed: () => Navigator.pop(context),
+                  isPrimary: false,
+                ),
+                const SizedBox(width: 12),
+                _buildDialogButton(
+                  context: context,
+                  label: '삭제',
+                  onPressed: () {
+                    final viewModel = Provider.of<TodoViewModel>(
+                      context,
+                      listen: false,
+                    );
+                    viewModel.deleteTodo(widget.todo.id);
+                    Navigator.pop(context); // 다이얼로그 닫기
+                    Navigator.pop(context); // 상세 화면 닫기
+                  },
+                  isPrimary: true,
+                  isDestructive: true,
+                ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              final viewModel = Provider.of<TodoViewModel>(
-                context,
-                listen: false,
-              );
-              viewModel.deleteTodo(widget.todo.id);
-              Navigator.pop(context); // 다이얼로그 닫기
-              Navigator.pop(context); // 상세 화면 닫기
-            },
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+        );
+      },
+    );
+  }
+
+  Widget _buildDialogButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback onPressed,
+    bool isPrimary = false,
+    bool isDestructive = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isPrimary
+              ? (isDestructive ? Colors.red : colorScheme.primary)
+              : colorScheme.surfaceVariant,
+          foregroundColor: isPrimary
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
+          elevation: isPrimary ? 2 : 0,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: isPrimary ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class ShakeAnimatedIcon extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  const ShakeAnimatedIcon({
+    super.key,
+    required this.icon,
+    required this.color,
+    this.size = 24,
+  });
+
+  @override
+  State<ShakeAnimatedIcon> createState() => _ShakeAnimatedIconState();
+}
+
+class _ShakeAnimatedIconState extends State<ShakeAnimatedIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _animation =
+        Tween<double>(begin: -0.1, end: 0.1).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.elasticIn),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            _controller.reverse();
+          } else if (status == AnimationStatus.dismissed) {
+            _controller.forward();
+          }
+        });
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.rotate(
+          angle: _animation.value,
+          child: Icon(widget.icon, color: widget.color, size: widget.size),
+        );
+      },
     );
   }
 }
