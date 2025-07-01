@@ -105,28 +105,29 @@ class TodoListView extends StatelessWidget {
           return false; // 스와이프 후 원래 위치로 돌아가도록
         } else {
           // 오른쪽에서 왼쪽으로 스와이프: 삭제
-          return await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('할 일 삭제'),
-              content: const Text('이 할 일을 삭제하시겠습니까?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('삭제', style: TextStyle(color: Colors.red)),
-                ),
-              ],
-            ),
-          );
+          return await _showDeleteConfirmDialog(context, todo.title);
         }
       },
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
           viewModel.deleteTodo(todo.id);
+
+          // 스낵바 표시
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('할 일이 삭제되었습니다'),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              action: SnackBarAction(
+                label: '실행 취소',
+                onPressed: () {
+                  // 실행 취소 로직 (실제로는 구현해야 함)
+                },
+              ),
+            ),
+          );
         }
       },
       child: Card(
@@ -241,6 +242,59 @@ class TodoListView extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<bool?> _showDeleteConfirmDialog(
+    BuildContext context,
+    String todoTitle,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(Icons.delete_outline, color: colorScheme.error, size: 32),
+        title: const Text('할 일 삭제'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('다음 할 일을 삭제하시겠습니까?'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorScheme.errorContainer.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: colorScheme.errorContainer, width: 1),
+              ),
+              child: Text(
+                todoTitle,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('취소', style: TextStyle(color: colorScheme.primary)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.errorContainer,
+              foregroundColor: colorScheme.onErrorContainer,
+            ),
+            child: const Text('삭제'),
+          ),
+        ],
       ),
     );
   }
