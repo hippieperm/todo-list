@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:todo/models/todo_model.dart';
-import 'package:todo/utils/date_formatter.dart';
-import 'package:todo/viewmodels/theme_viewmodel.dart';
-import 'package:todo/viewmodels/todo_viewmodel.dart';
-import 'package:todo/views/todo_detail_view.dart';
+import '../models/todo_model.dart';
+import '../utils/date_formatter.dart';
+import '../viewmodels/theme_viewmodel.dart';
+import '../viewmodels/todo_viewmodel.dart';
+import 'todo_detail_view.dart';
 
 class TodoListView extends StatelessWidget {
   const TodoListView({super.key});

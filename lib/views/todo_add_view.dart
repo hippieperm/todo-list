@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:todo/models/todo_model.dart';
-import 'package:todo/viewmodels/theme_viewmodel.dart';
-import 'package:todo/viewmodels/todo_viewmodel.dart';
+import '../models/todo_model.dart';
+import '../viewmodels/theme_viewmodel.dart';
+import '../viewmodels/todo_viewmodel.dart';
 
 class TodoAddView extends StatefulWidget {
   const TodoAddView({super.key});

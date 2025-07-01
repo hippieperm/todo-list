@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:todo/viewmodels/theme_viewmodel.dart';
-import 'package:todo/viewmodels/todo_viewmodel.dart';
-import 'package:todo/views/todo_add_view.dart';
-import 'package:todo/views/todo_list_view.dart';
+import '../viewmodels/theme_viewmodel.dart';
+import '../viewmodels/todo_viewmodel.dart';
+import 'todo_add_view.dart';
+import 'todo_list_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});

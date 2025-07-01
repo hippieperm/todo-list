@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:todo/models/todo_model.dart';
-import 'package:todo/services/database_service.dart';
+import '../models/todo_model.dart';
+import '../services/database_service.dart';
 
 class TodoViewModel extends ChangeNotifier {
   final DatabaseService _databaseService = DatabaseService();

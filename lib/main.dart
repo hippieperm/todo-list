@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'package:todo/utils/app_theme.dart';
-import 'package:todo/viewmodels/theme_viewmodel.dart';
-import 'package:todo/viewmodels/todo_viewmodel.dart';
-import 'package:todo/views/home_view.dart';
-import 'package:todo/views/splash_view.dart';
+import 'utils/app_theme.dart';
+import 'viewmodels/theme_viewmodel.dart';
+import 'viewmodels/todo_viewmodel.dart';
+import 'views/splash_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

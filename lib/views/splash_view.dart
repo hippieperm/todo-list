@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:todo/views/home_view.dart';
+import 'home_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
