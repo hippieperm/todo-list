@@ -61,6 +61,7 @@ class _TodoDetailViewState extends State<TodoDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 50),
               // 제목 입력
               TextField(
                 controller: _titleController,
