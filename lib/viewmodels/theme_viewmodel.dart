@@ -2,36 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeViewModel extends ChangeNotifier {
+  // 항상 다크 모드만 사용
   ThemeMode _themeMode = ThemeMode.dark;
 
-  ThemeMode get themeMode => _themeMode;
+  ThemeMode get themeMode => ThemeMode.dark;
 
-  bool get isDarkMode => _themeMode == ThemeMode.dark;
+  bool get isDarkMode => true;
 
-  ThemeViewModel() {
-    _loadThemeMode();
-  }
-
-  Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeModeIndex = prefs.getInt('themeMode') ?? 2;
-    _themeMode = ThemeMode.values[themeModeIndex];
-    notifyListeners();
-  }
-
-  Future<void> setThemeMode(ThemeMode mode) async {
-    _themeMode = mode;
-    notifyListeners();
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('themeMode', mode.index);
-  }
-
-  Future<void> toggleThemeMode() async {
-    if (_themeMode == ThemeMode.dark) {
-      await setThemeMode(ThemeMode.light);
-    } else {
-      await setThemeMode(ThemeMode.dark);
-    }
-  }
+  ThemeViewModel();
 }

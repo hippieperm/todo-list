@@ -1,45 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.deepPurple,
-      brightness: Brightness.light,
-    ),
-    appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-    cardTheme: CardThemeData(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      elevation: 4,
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.grey.shade100,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    ),
-  );
-
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
@@ -62,9 +23,7 @@ class AppTheme {
         fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
-      iconTheme: const IconThemeData(
-        color: Colors.white,
-      ),
+      iconTheme: const IconThemeData(color: Colors.white),
     ),
     cardTheme: CardThemeData(
       elevation: 2,
@@ -98,9 +57,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: Colors.deepPurpleAccent,
         foregroundColor: Colors.white,
       ),
@@ -112,9 +69,18 @@ class AppTheme {
       titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       titleMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       titleSmall: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      headlineLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      headlineMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      headlineSmall: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      headlineLarge: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineMedium: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineSmall: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color>((states) {
@@ -139,8 +105,6 @@ class AppTheme {
         return Colors.grey.shade700;
       }),
     ),
-    iconTheme: const IconThemeData(
-      color: Colors.white,
-    ),
+    iconTheme: const IconThemeData(color: Colors.white),
   );
 }

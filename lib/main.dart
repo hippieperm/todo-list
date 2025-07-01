@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         builder: (context, themeViewModel, _) {
           return MaterialApp(
             title: '할 일 관리',
-            theme: AppTheme.lightTheme,
+            theme: AppTheme.darkTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: themeViewModel.themeMode,
+            themeMode: ThemeMode.dark,
             home: const HomeView(),
             debugShowCheckedModeBanner: false,
             localizationsDelegates: [
