@@ -3,6 +3,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/models/todo_model.dart';
 import 'package:todo/utils/date_formatter.dart';
+import 'package:todo/viewmodels/theme_viewmodel.dart';
 import 'package:todo/viewmodels/todo_viewmodel.dart';
 import 'package:todo/views/todo_detail_view.dart';
 
@@ -62,6 +63,7 @@ class TodoListView extends StatelessWidget {
     TodoViewModel viewModel,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Provider.of<ThemeViewModel>(context).isDarkMode;
 
     // 우선순위에 따른 색상
     Color priorityColor;
@@ -69,15 +71,15 @@ class TodoListView extends StatelessWidget {
 
     switch (todo.priority) {
       case 1:
-        priorityColor = Colors.green;
+        priorityColor = isDarkMode ? Colors.green.shade300 : Colors.green;
         priorityText = '낮음';
         break;
       case 3:
-        priorityColor = Colors.red;
+        priorityColor = isDarkMode ? Colors.red.shade300 : Colors.red;
         priorityText = '높음';
         break;
       default:
-        priorityColor = Colors.orange;
+        priorityColor = isDarkMode ? Colors.orange.shade300 : Colors.orange;
         priorityText = '중간';
     }
 
@@ -209,7 +211,9 @@ class TodoListView extends StatelessWidget {
                               : '생성: ${DateFormatter.formatDate(todo.createdAt)}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: colorScheme.onSurface.withOpacity(0.5),
+                            color: isDarkMode
+                                ? colorScheme.onSurface.withOpacity(0.7)
+                                : colorScheme.onSurface.withOpacity(0.5),
                           ),
                         ),
                       ],
@@ -264,16 +268,18 @@ class TodoListView extends StatelessWidget {
     Todo todo,
     TodoViewModel viewModel,
   ) {
+    final isDarkMode = Provider.of<ThemeViewModel>(context).isDarkMode;
+
     Color color;
     switch (priority) {
       case 1:
-        color = Colors.green;
+        color = isDarkMode ? Colors.green.shade300 : Colors.green;
         break;
       case 3:
-        color = Colors.red;
+        color = isDarkMode ? Colors.red.shade300 : Colors.red;
         break;
       default:
-        color = Colors.orange;
+        color = isDarkMode ? Colors.orange.shade300 : Colors.orange;
     }
 
     return InkWell(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/models/todo_model.dart';
 import 'package:todo/utils/date_formatter.dart';
+import 'package:todo/viewmodels/theme_viewmodel.dart';
 import 'package:todo/viewmodels/todo_viewmodel.dart';
 
 class TodoDetailView extends StatefulWidget {
@@ -40,24 +41,7 @@ class _TodoDetailViewState extends State<TodoDetailView> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    // 우선순위에 따른 색상
-    Color priorityColor;
-    String priorityText;
-
-    switch (_priority) {
-      case 1:
-        priorityColor = Colors.green;
-        priorityText = '낮음';
-        break;
-      case 3:
-        priorityColor = Colors.red;
-        priorityText = '높음';
-        break;
-      default:
-        priorityColor = Colors.orange;
-        priorityText = '중간';
-    }
+    final isDarkMode = Provider.of<ThemeViewModel>(context).isDarkMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -103,11 +87,26 @@ class _TodoDetailViewState extends State<TodoDetailView> {
             const SizedBox(height: 8),
             Row(
               children: [
-                _buildPriorityButton(context, '낮음', 1, Colors.green),
+                _buildPriorityButton(
+                  context,
+                  '낮음',
+                  1,
+                  isDarkMode ? Colors.green.shade300 : Colors.green,
+                ),
                 const SizedBox(width: 8),
-                _buildPriorityButton(context, '중간', 2, Colors.orange),
+                _buildPriorityButton(
+                  context,
+                  '중간',
+                  2,
+                  isDarkMode ? Colors.orange.shade300 : Colors.orange,
+                ),
                 const SizedBox(width: 8),
-                _buildPriorityButton(context, '높음', 3, Colors.red),
+                _buildPriorityButton(
+                  context,
+                  '높음',
+                  3,
+                  isDarkMode ? Colors.red.shade300 : Colors.red,
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -133,7 +132,11 @@ class _TodoDetailViewState extends State<TodoDetailView> {
             if (widget.todo.createdAt != null)
               Text(
                 '생성일: ${DateFormatter.formatDate(widget.todo.createdAt)}',
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                style: TextStyle(
+                  color: isDarkMode
+                      ? colorScheme.onSurface.withOpacity(0.8)
+                      : colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             if (widget.todo.completedAt != null)
               Padding(
@@ -141,7 +144,9 @@ class _TodoDetailViewState extends State<TodoDetailView> {
                 child: Text(
                   '완료일: ${DateFormatter.formatDate(widget.todo.completedAt!)}',
                   style: TextStyle(
-                    color: colorScheme.onSurface.withOpacity(0.6),
+                    color: isDarkMode
+                        ? colorScheme.onSurface.withOpacity(0.8)
+                        : colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ),
