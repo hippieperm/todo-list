@@ -98,12 +98,21 @@ class TodoViewModel extends ChangeNotifier {
     _applyFilters();
   }
 
-  Future<void> addTodo(Todo todo) async {
+  Future<bool> addTodo(Todo todo) async {
     try {
+      debugPrint('할 일 추가 시도: ${todo.title}');
+      debugPrint('시간 진행률 사용: ${todo.useTimeProgress}');
+      if (todo.useTimeProgress) {
+        debugPrint('시작 시간: ${todo.startTime}');
+        debugPrint('종료 시간: ${todo.endTime}');
+      }
+
       await _databaseService.insertTodo(todo);
       await loadTodos();
+      return true;
     } catch (e) {
       debugPrint('할 일 추가 중 오류 발생: $e');
+      return false;
     }
   }
 

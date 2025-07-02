@@ -18,6 +18,10 @@ class DateFormatter {
     }
   }
 
+  static String formatDateTime(DateTime date) {
+    return DateFormat('yyyy년 MM월 dd일 HH:mm', 'ko_KR').format(date);
+  }
+
   static String formatRelativeTime(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);

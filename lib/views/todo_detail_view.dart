@@ -19,6 +19,9 @@ class _TodoDetailViewState extends State<TodoDetailView> {
   late TextEditingController _descriptionController;
   late bool _isCompleted;
   late int _priority;
+  late bool _useTimeProgress;
+  DateTime? _startTime;
+  DateTime? _endTime;
 
   @override
   void initState() {
@@ -29,6 +32,9 @@ class _TodoDetailViewState extends State<TodoDetailView> {
     );
     _isCompleted = widget.todo.isCompleted;
     _priority = widget.todo.priority;
+    _useTimeProgress = widget.todo.useTimeProgress;
+    _startTime = widget.todo.startTime;
+    _endTime = widget.todo.endTime;
   }
 
   @override
@@ -117,6 +123,88 @@ class _TodoDetailViewState extends State<TodoDetailView> {
               ),
               const SizedBox(height: 24),
 
+              // 시간 진행률 사용 여부
+              Row(
+                children: [
+                  Switch(
+                    value: _useTimeProgress,
+                    onChanged: (value) {
+                      setState(() {
+                        _useTimeProgress = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('시간 진행률 사용'),
+                ],
+              ),
+
+              // 시간 설정 섹션
+              if (_useTimeProgress) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+
+                // 시작 시간 설정
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '시작 시간',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _selectDateTime(true),
+                      icon: const Icon(Icons.access_time),
+                      label: Text(
+                        _startTime != null
+                            ? DateFormatter.formatDateTime(_startTime!)
+                            : '시작 시간 설정',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // 종료 시간 설정
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '종료 시간',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _selectDateTime(false),
+                      icon: const Icon(Icons.access_time),
+                      label: Text(
+                        _endTime != null
+                            ? DateFormatter.formatDateTime(_endTime!)
+                            : '종료 시간 설정',
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (_startTime != null && _endTime != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '총 소요 시간: ${_formatDuration(_endTime!.difference(_startTime!))}',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+                const Divider(),
+              ],
+
+              const SizedBox(height: 16),
+
               // 완료 여부
               Row(
                 children: [
@@ -177,6 +265,68 @@ class _TodoDetailViewState extends State<TodoDetailView> {
     );
   }
 
+  // 시간 선택 다이얼로그
+  Future<void> _selectDateTime(bool isStartTime) async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = isStartTime
+        ? (_startTime ?? now)
+        : (_endTime ?? now.add(const Duration(hours: 1)));
+
+    // 날짜 선택
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 365)),
+    );
+
+    if (selectedDate != null) {
+      // 시간 선택
+      final TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDate),
+      );
+
+      if (selectedTime != null) {
+        setState(() {
+          final newDateTime = DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            selectedDate.day,
+            selectedTime.hour,
+            selectedTime.minute,
+          );
+
+          if (isStartTime) {
+            _startTime = newDateTime;
+            // 시작 시간이 종료 시간보다 늦으면 종료 시간도 업데이트
+            if (_endTime != null && newDateTime.isAfter(_endTime!)) {
+              _endTime = newDateTime.add(const Duration(hours: 1));
+            }
+          } else {
+            // 종료 시간이 시작 시간보다 빠르면 경고
+            if (_startTime != null && newDateTime.isBefore(_startTime!)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('종료 시간은 시작 시간보다 늦어야 합니다')),
+              );
+            } else {
+              _endTime = newDateTime;
+            }
+          }
+        });
+      }
+    }
+  }
+
+  // 시간 차이를 포맷팅
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String twoDigitHours = twoDigits(duration.inHours);
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+
+    return '$twoDigitHours시간 $twoDigitMinutes분';
+  }
+
   Widget _buildPriorityButton(
     BuildContext context,
     String label,
@@ -232,6 +382,14 @@ class _TodoDetailViewState extends State<TodoDetailView> {
       return;
     }
 
+    // 시간 진행률을 사용하는 경우 시작/종료 시간 검증
+    if (_useTimeProgress && (_startTime == null || _endTime == null)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('시작 시간과 종료 시간을 모두 설정해주세요')));
+      return;
+    }
+
     // 업데이트된 할 일 객체 생성
     final updatedTodo = widget.todo.copyWith(
       title: _titleController.text.trim(),
@@ -241,6 +399,9 @@ class _TodoDetailViewState extends State<TodoDetailView> {
           ? (widget.todo.completedAt ?? DateTime.now())
           : null,
       priority: _priority,
+      startTime: _useTimeProgress ? _startTime : null,
+      endTime: _useTimeProgress ? _endTime : null,
+      useTimeProgress: _useTimeProgress,
     );
 
     // 저장

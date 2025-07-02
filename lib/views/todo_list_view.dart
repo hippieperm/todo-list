@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/todo_model.dart';
 import '../utils/date_formatter.dart';
+import '../utils/time_progress_util.dart';
 import '../viewmodels/theme_viewmodel.dart';
 import '../viewmodels/todo_viewmodel.dart';
 import 'todo_detail_view.dart';
@@ -83,6 +84,11 @@ class TodoListView extends StatelessWidget {
         priorityText = '중간';
     }
 
+    // 시간 진행률 계산
+    final progress = TimeProgressUtil.calculateProgress(todo);
+    final progressColor = TimeProgressUtil.getProgressColor(progress);
+    final remainingTimeText = TimeProgressUtil.getRemainingTimeText(todo);
+
     // iOS 스타일 스와이프 기능
     return Dismissible(
       key: Key(todo.id),
@@ -147,98 +153,156 @@ class TodoListView extends StatelessWidget {
             );
           },
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // 체크박스
-                Transform.scale(
-                  scale: 1.2,
-                  child: Checkbox(
-                    shape: const CircleBorder(),
-                    value: todo.isCompleted,
-                    activeColor: colorScheme.primary,
-                    onChanged: (value) {
-                      viewModel.toggleTodoStatus(todo);
-                    },
+          child: Container(
+            decoration: todo.useTimeProgress && !todo.isCompleted
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        progressColor.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
+                      stops: [progress, progress],
+                    ),
+                  )
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // 체크박스
+                  Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      shape: const CircleBorder(),
+                      value: todo.isCompleted,
+                      activeColor: colorScheme.primary,
+                      onChanged: (value) {
+                        viewModel.toggleTodoStatus(todo);
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                // 할 일 내용
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              todo.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                decoration: todo.isCompleted
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                                color: todo.isCompleted
-                                    ? colorScheme.onSurface.withOpacity(0.6)
-                                    : colorScheme.onSurface,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (!todo.isCompleted)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: priorityColor.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                  const SizedBox(width: 8),
+                  // 할 일 내용
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
                               child: Text(
-                                priorityText,
+                                todo.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: todo.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                  color: todo.isCompleted
+                                      ? colorScheme.onSurface.withOpacity(0.6)
+                                      : colorScheme.onSurface,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (!todo.isCompleted)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: priorityColor.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  priorityText,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: priorityColor,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        if (todo.description.isNotEmpty)
+                          Text(
+                            todo.description,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurface.withOpacity(0.7),
+                              decoration: todo.isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const SizedBox(height: 4),
+                        // 시간 정보 표시
+                        if (todo.useTimeProgress &&
+                            !todo.isCompleted &&
+                            remainingTimeText.isNotEmpty)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: progressColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                remainingTimeText,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: priorityColor,
+                                  color: progressColor,
                                 ),
                               ),
+                            ],
+                          )
+                        else
+                          Text(
+                            todo.isCompleted
+                                ? '완료: ${DateFormatter.formatDate(todo.completedAt!)}'
+                                : '생성: ${DateFormatter.formatDate(todo.createdAt)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDarkMode
+                                  ? colorScheme.onSurface.withOpacity(0.7)
+                                  : colorScheme.onSurface.withOpacity(0.5),
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      if (todo.description.isNotEmpty)
-                        Text(
-                          todo.description,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                            decoration: todo.isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                        todo.isCompleted
-                            ? '완료: ${DateFormatter.formatDate(todo.completedAt!)}'
-                            : '생성: ${DateFormatter.formatDate(todo.createdAt)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDarkMode
-                              ? colorScheme.onSurface.withOpacity(0.7)
-                              : colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                      ),
-                    ],
+                        // 시간 진행률 표시
+                        if (todo.useTimeProgress &&
+                            !todo.isCompleted &&
+                            todo.startTime != null &&
+                            todo.endTime != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                backgroundColor: colorScheme.surfaceVariant,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  progressColor,
+                                ),
+                                minHeight: 4,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

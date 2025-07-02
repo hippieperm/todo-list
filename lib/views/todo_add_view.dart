@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/todo_model.dart';
+import '../utils/date_formatter.dart';
 import '../viewmodels/theme_viewmodel.dart';
 import '../viewmodels/todo_viewmodel.dart';
 
@@ -15,6 +16,10 @@ class _TodoAddViewState extends State<TodoAddView> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   int _priority = 2; // 기본 우선순위: 중간
+  bool _useTimeProgress = false; // 시간 진행률 사용 여부
+  DateTime? _startTime;
+  DateTime? _endTime;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -86,6 +91,87 @@ class _TodoAddViewState extends State<TodoAddView> {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+
+            // 시간 진행률 사용 여부
+            Row(
+              children: [
+                Switch(
+                  value: _useTimeProgress,
+                  onChanged: (value) {
+                    setState(() {
+                      _useTimeProgress = value;
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+                const Text('시간 진행률 사용'),
+              ],
+            ),
+
+            // 시간 설정 섹션
+            if (_useTimeProgress) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+
+              // 시작 시간 설정
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '시작 시간',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _selectDateTime(true),
+                    icon: const Icon(Icons.access_time),
+                    label: Text(
+                      _startTime != null
+                          ? DateFormatter.formatDateTime(_startTime!)
+                          : '시작 시간 설정',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 종료 시간 설정
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '종료 시간',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _selectDateTime(false),
+                    icon: const Icon(Icons.access_time),
+                    label: Text(
+                      _endTime != null
+                          ? DateFormatter.formatDateTime(_endTime!)
+                          : '종료 시간 설정',
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_startTime != null && _endTime != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '총 소요 시간: ${_formatDuration(_endTime!.difference(_startTime!))}',
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 16),
+              const Divider(),
+            ],
           ],
         ),
       ),
@@ -93,17 +179,88 @@ class _TodoAddViewState extends State<TodoAddView> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: ElevatedButton(
-            onPressed: _addTodo,
+            onPressed: _isLoading ? null : _addTodo,
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text('추가'),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('추가'),
           ),
         ),
       ),
     );
+  }
+
+  // 시간 선택 다이얼로그
+  Future<void> _selectDateTime(bool isStartTime) async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = isStartTime
+        ? (_startTime ?? now)
+        : (_endTime ?? now.add(const Duration(hours: 1)));
+
+    // 날짜 선택
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 365)),
+    );
+
+    if (selectedDate != null) {
+      // 시간 선택
+      final TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDate),
+      );
+
+      if (selectedTime != null) {
+        setState(() {
+          final newDateTime = DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            selectedDate.day,
+            selectedTime.hour,
+            selectedTime.minute,
+          );
+
+          if (isStartTime) {
+            _startTime = newDateTime;
+            // 시작 시간이 종료 시간보다 늦으면 종료 시간도 업데이트
+            if (_endTime != null && newDateTime.isAfter(_endTime!)) {
+              _endTime = newDateTime.add(const Duration(hours: 1));
+            }
+          } else {
+            // 종료 시간이 시작 시간보다 빠르면 경고
+            if (_startTime != null && newDateTime.isBefore(_startTime!)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('종료 시간은 시작 시간보다 늦어야 합니다')),
+              );
+            } else {
+              _endTime = newDateTime;
+            }
+          }
+        });
+      }
+    }
+  }
+
+  // 시간 차이를 포맷팅
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String twoDigitHours = twoDigits(duration.inHours);
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+
+    return '$twoDigitHours시간 $twoDigitMinutes분';
   }
 
   Widget _buildPriorityButton(
@@ -150,7 +307,7 @@ class _TodoAddViewState extends State<TodoAddView> {
     );
   }
 
-  void _addTodo() {
+  Future<void> _addTodo() async {
     final viewModel = Provider.of<TodoViewModel>(context, listen: false);
 
     // 입력값 검증
@@ -162,15 +319,57 @@ class _TodoAddViewState extends State<TodoAddView> {
       return;
     }
 
-    // 새 할 일 객체 생성
-    final newTodo = Todo(
-      title: title,
-      description: _descriptionController.text.trim(),
-      priority: _priority,
-    );
+    // 시간 진행률을 사용하는 경우 시작/종료 시간 검증
+    if (_useTimeProgress && (_startTime == null || _endTime == null)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('시작 시간과 종료 시간을 모두 설정해주세요')));
+      return;
+    }
 
-    // 저장
-    viewModel.addTodo(newTodo);
-    Navigator.pop(context);
+    // 로딩 상태 설정
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 새 할 일 객체 생성
+      final newTodo = Todo(
+        title: title,
+        description: _descriptionController.text.trim(),
+        priority: _priority,
+        startTime: _useTimeProgress ? _startTime : null,
+        endTime: _useTimeProgress ? _endTime : null,
+        useTimeProgress: _useTimeProgress,
+      );
+
+      // 저장
+      final success = await viewModel.addTodo(newTodo);
+
+      if (success) {
+        Navigator.pop(context);
+      } else {
+        // 실패 시 사용자에게 알림
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('할 일을 추가하는 중 오류가 발생했습니다')),
+          );
+        }
+      }
+    } catch (e) {
+      // 예외 발생 시 사용자에게 알림
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('오류 발생: $e')));
+      }
+    } finally {
+      // 로딩 상태 해제
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }
