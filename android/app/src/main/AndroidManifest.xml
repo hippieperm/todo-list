@@ -15,12 +15,12 @@
         
         <!-- 백업 및 복원 작업을 위한 foregroundServiceType 설정 -->
         <service
-            android:name="com.todoapp.daily.DataSyncService"
+            android:name="com.example.todo.DataSyncService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
             
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.todo.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -59,6 +59,6 @@
         </intent>
         
         <!-- Android 15 패키지 가시성 대응 -->
-        <package android:name="com.todoapp.daily" />
+        <package android:name="com.example.todo" />
     </queries>
 </manifest>
