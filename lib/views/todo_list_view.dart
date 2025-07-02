@@ -306,25 +306,6 @@ class _TodoListViewState extends State<TodoListView> {
                                   : colorScheme.onSurface.withOpacity(0.5),
                             ),
                           ),
-                        // 시간 진행률 표시
-                        if (todo.useTimeProgress &&
-                            !todo.isCompleted &&
-                            todo.startTime != null &&
-                            todo.endTime != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                backgroundColor: colorScheme.surfaceVariant,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  progressColor,
-                                ),
-                                minHeight: 4,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
