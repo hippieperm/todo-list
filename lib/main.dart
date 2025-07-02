@@ -13,15 +13,6 @@ import 'services/database_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 데이터베이스 초기화 문제 해결을 위해 기존 데이터베이스 삭제 (개발 중에만 사용)
-  try {
-    String path = join(await getDatabasesPath(), 'todo_database.db');
-    await deleteDatabase(path);
-    debugPrint('기존 데이터베이스 삭제 완료');
-  } catch (e) {
-    debugPrint('데이터베이스 삭제 중 오류: $e');
-  }
-
   // 데이터베이스 서비스 사전 초기화
   final dbService = DatabaseService();
   await dbService.database;

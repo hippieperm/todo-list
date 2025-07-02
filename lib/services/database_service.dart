@@ -55,21 +55,35 @@ class DatabaseService {
     if (oldVersion < 2) {
       // 버전 1에서 2로 업그레이드: 시간 관련 필드 추가
       try {
-        await db.transaction((txn) async {
-          // 각 ALTER TABLE 문을 별도로 실행
-          await txn.execute('ALTER TABLE todos ADD COLUMN startTime INTEGER;');
-          await txn.execute('ALTER TABLE todos ADD COLUMN endTime INTEGER;');
-          await txn.execute(
+        // 각 ALTER TABLE 문을 별도로 실행하고 오류 처리
+        try {
+          await db.execute('ALTER TABLE todos ADD COLUMN startTime INTEGER;');
+        } catch (e) {
+          print('startTime 필드 추가 중 오류: $e');
+        }
+
+        try {
+          await db.execute('ALTER TABLE todos ADD COLUMN endTime INTEGER;');
+        } catch (e) {
+          print('endTime 필드 추가 중 오류: $e');
+        }
+
+        try {
+          await db.execute(
             'ALTER TABLE todos ADD COLUMN useTimeProgress INTEGER NOT NULL DEFAULT 0;',
           );
-        });
-      } catch (e) {
-        print('데이터베이스 업그레이드 오류: $e');
+        } catch (e) {
+          print('useTimeProgress 필드 추가 중 오류: $e');
+        }
 
-        // 테이블을 다시 생성하는 방법 (기존 데이터는 손실됨)
-        // 실제 앱에서는 데이터 마이그레이션 로직이 필요할 수 있음
-        await db.execute('DROP TABLE IF EXISTS todos');
-        await _createDb(db, newVersion);
+        // 기존 데이터 확인
+        final count = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM todos'),
+        );
+        print('기존 할 일 데이터 수: $count');
+      } catch (e) {
+        print('데이터베이스 업그레이드 중 오류 발생: $e');
+        // 오류가 발생해도 앱이 계속 실행되도록 함
       }
     }
   }

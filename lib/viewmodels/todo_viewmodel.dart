@@ -25,6 +25,23 @@ class TodoViewModel extends ChangeNotifier {
 
     try {
       _todos = await _databaseService.getTodos();
+      debugPrint('할 일 ${_todos.length}개 로드됨');
+
+      // 데이터 유효성 검사
+      _todos = _todos.where((todo) {
+        try {
+          // 필수 필드 검증
+          if (todo.id.isEmpty || todo.title.isEmpty) {
+            debugPrint('유효하지 않은 할 일 데이터 발견: ${todo.id}');
+            return false;
+          }
+          return true;
+        } catch (e) {
+          debugPrint('할 일 데이터 처리 중 오류: $e');
+          return false;
+        }
+      }).toList();
+
       _applyFilters();
     } catch (e) {
       debugPrint('할 일 목록 로딩 중 오류 발생: $e');
