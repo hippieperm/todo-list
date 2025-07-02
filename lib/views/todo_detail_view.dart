@@ -323,8 +323,9 @@ class _TodoDetailViewState extends State<TodoDetailView> {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String twoDigitHours = twoDigits(duration.inHours);
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
 
-    return '$twoDigitHours시간 $twoDigitMinutes분';
+    return '$twoDigitHours시간 $twoDigitMinutes분 $twoDigitSeconds초';
   }
 
   Widget _buildPriorityButton(

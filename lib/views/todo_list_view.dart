@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +9,34 @@ import '../viewmodels/theme_viewmodel.dart';
 import '../viewmodels/todo_viewmodel.dart';
 import 'todo_detail_view.dart';
 
-class TodoListView extends StatelessWidget {
+class TodoListView extends StatefulWidget {
   const TodoListView({super.key});
+
+  @override
+  State<TodoListView> createState() => _TodoListViewState();
+}
+
+class _TodoListViewState extends State<TodoListView> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // 1초마다 UI 갱신을 위한 타이머 설정
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          // 상태 갱신으로 UI 리빌드
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

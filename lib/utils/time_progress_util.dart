@@ -48,7 +48,7 @@ class TimeProgressUtil {
     }
   }
 
-  /// 남은 시간을 문자열로 반환합니다
+  /// 남은 시간을 문자열로 반환합니다 (초 단위까지 표시)
   static String getRemainingTimeText(Todo todo) {
     if (todo.endTime == null || !todo.useTimeProgress) {
       return '';
@@ -63,11 +63,22 @@ class TimeProgressUtil {
     final remaining = todo.endTime!.difference(now);
 
     if (remaining.inDays > 0) {
-      return '${remaining.inDays}일 남음';
+      final hours = remaining.inHours % 24;
+      final minutes = remaining.inMinutes % 60;
+      final seconds = remaining.inSeconds % 60;
+
+      if (hours > 0) {
+        return '${remaining.inDays}일 ${hours}시간 ${minutes}분 ${seconds}초 남음';
+      } else {
+        return '${remaining.inDays}일 ${minutes}분 ${seconds}초 남음';
+      }
     } else if (remaining.inHours > 0) {
-      return '${remaining.inHours}시간 남음';
+      final minutes = remaining.inMinutes % 60;
+      final seconds = remaining.inSeconds % 60;
+      return '${remaining.inHours}시간 ${minutes}분 ${seconds}초 남음';
     } else if (remaining.inMinutes > 0) {
-      return '${remaining.inMinutes}분 남음';
+      final seconds = remaining.inSeconds % 60;
+      return '${remaining.inMinutes}분 ${seconds}초 남음';
     } else {
       return '${remaining.inSeconds}초 남음';
     }
