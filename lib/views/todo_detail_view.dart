@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/todo_model.dart';
 import '../utils/date_formatter.dart';
+import '../utils/animated_priority_button.dart';
 import '../viewmodels/theme_viewmodel.dart';
 import '../viewmodels/todo_viewmodel.dart';
 
@@ -97,29 +98,14 @@ class _TodoDetailViewState extends State<TodoDetailView> {
               // 우선순위 선택
               Text('우선순위', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  _buildPriorityButton(
-                    context,
-                    '낮음',
-                    1,
-                    isDarkMode ? Colors.green.shade300 : Colors.green,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildPriorityButton(
-                    context,
-                    '중간',
-                    2,
-                    isDarkMode ? Colors.orange.shade300 : Colors.orange,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildPriorityButton(
-                    context,
-                    '높음',
-                    3,
-                    isDarkMode ? Colors.red.shade300 : Colors.red,
-                  ),
-                ],
+              PriorityButtonGroup(
+                initialPriority: _priority,
+                onPriorityChanged: (priority) {
+                  setState(() {
+                    _priority = priority;
+                  });
+                },
+                isDarkMode: isDarkMode,
               ),
               const SizedBox(height: 24),
 
@@ -326,50 +312,6 @@ class _TodoDetailViewState extends State<TodoDetailView> {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
 
     return '$twoDigitHours시간 $twoDigitMinutes분 $twoDigitSeconds초';
-  }
-
-  Widget _buildPriorityButton(
-    BuildContext context,
-    String label,
-    int priority,
-    Color color,
-  ) {
-    final isSelected = _priority == priority;
-
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _priority = priority;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
-            border: Border.all(
-              color: isSelected ? color : Colors.grey.withOpacity(0.3),
-              width: isSelected ? 2 : 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.flag, color: isSelected ? color : Colors.grey),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? color : null,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _saveTodo() {
