@@ -1,26 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     
-    <!-- Android 15 대응을 위한 foregroundServiceType 선언 -->
-    <!-- 로컬 데이터베이스 백업 및 동기화를 위해 사용 -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- 필요한 권한만 남기고 정리 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     
     <application
         android:label="할 일 관리"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
-        
-        <!-- 백업 및 복원 작업을 위한 foregroundServiceType 설정 -->
-        <service
-            android:name="com.example.todo.DataSyncService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
             
         <activity
-            android:name="com.example.todo.MainActivity"
+            android:name="com.todoapp.daily.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -58,7 +49,7 @@
             <data android:mimeType="text/plain"/>
         </intent>
         
-        <!-- Android 15 패키지 가시성 대응 -->
-        <package android:name="com.example.todo" />
+        <!-- 패키지 이름 수정 -->
+        <package android:name="com.todoapp.daily" />
     </queries>
 </manifest>

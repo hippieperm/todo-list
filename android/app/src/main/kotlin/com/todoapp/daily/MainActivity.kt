@@ -1,4 +1,4 @@
-package com.example.todo
+package com.todoapp.daily
 
 import android.os.Build
 import android.os.Bundle
